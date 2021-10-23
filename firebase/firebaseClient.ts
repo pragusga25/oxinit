@@ -18,9 +18,10 @@ if (getApps().length) {
   app = getApp();
 } else {
   app = initializeApp(firebaseConfig);
-  if (typeof window !== 'undefined') {
-    getAnalytics(app);
-  }
+}
+
+if (typeof window !== 'undefined') {
+  getAnalytics(app);
 }
 
 const auth = getAuth(app);
