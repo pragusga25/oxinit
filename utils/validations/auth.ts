@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const Login = z.object({
-  email: z.string().email(),
+  email: z.string().email('Email tidak valid'),
   password: z
     .string()
     .min(8, 'Password harus memiliki minimal 8 karakter')

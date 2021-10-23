@@ -19,11 +19,17 @@ function SignInScreen() {
     mode: 'onBlur',
   });
 
+  const {
+    getValues,
+    trigger,
+    formState: { isSubmitting },
+  } = ctx;
+
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (await ctx.trigger())
+    if (await trigger())
       auth
-        .loginWithEmailAndPassword(ctx.getValues().email, ctx.getValues().password)
+        .loginWithEmailAndPassword(getValues().email, getValues().password)
         .then(() => {
           successToast('Berhasil login');
         })
@@ -38,7 +44,9 @@ function SignInScreen() {
         <form onSubmit={onSubmit}>
           <Input type="email" placeholder="Email" name="email" />
           <Input type="password" placeholder="Password" name="password" />
-          <Button type="submit">Login</Button>
+          <Button type="submit" disabled={isSubmitting}>
+            Login
+          </Button>
         </form>
       </FormProvider>
     </Box>

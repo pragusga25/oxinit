@@ -2,11 +2,12 @@ import { Input as InputCh, Box, InputProps, Text } from '@chakra-ui/react';
 import { useFormContext } from 'react-hook-form';
 import { FC } from 'react';
 
-export const Input: FC<InputProps & { showError?: boolean }> = ({
-  name = '',
-  showError = false,
-  ...props
-}) => {
+interface CustomInputProps extends InputProps {
+  showError?: boolean;
+  name: string;
+}
+
+export const Input: FC<CustomInputProps> = ({ name, showError = false, ...props }) => {
   const {
     register,
     formState: { isSubmitting, errors },
