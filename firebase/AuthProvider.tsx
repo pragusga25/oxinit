@@ -50,28 +50,32 @@ export function AuthProvider({ children, initialUid }: any) {
     router.back();
   };
 
-  const loginWithGoogle = async () => {
+  const loginWithGoogle = async (autoRedirect = true) => {
     try {
       await signInWithPopup(auth, new GoogleAuthProvider());
-      pushToNextPage();
+      autoRedirect && pushToNextPage();
     } catch (err: any) {
       throw new Error(err.message);
     }
   };
 
-  const loginWithEmailAndPassword = async (email: string, password: string) => {
+  const loginWithEmailAndPassword = async (
+    email: string,
+    password: string,
+    autoRedirect = true
+  ) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      pushToNextPage();
+      autoRedirect && pushToNextPage();
     } catch (err: any) {
       throw new Error(err.message);
     }
   };
 
-  const logout = async () => {
+  const logout = async (autoRedirect = true) => {
     try {
       await signOut(auth);
-      router.push('/');
+      autoRedirect && router.push('/');
     } catch (err: any) {
       throw new Error(err.message);
     }
