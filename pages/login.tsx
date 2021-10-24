@@ -48,6 +48,13 @@ function SignInScreen() {
             Login
           </Button>
         </form>
+        <Button
+          onClick={async () => {
+            await auth.loginWithGoogle();
+          }}
+        >
+          Login with Google
+        </Button>
       </FormProvider>
     </Box>
   );

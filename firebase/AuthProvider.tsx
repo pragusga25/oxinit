@@ -8,11 +8,14 @@ import {
   signOut,
 } from 'firebase/auth';
 import { auth } from './firebaseClient';
+import { useRouter } from 'next/router';
 
 const AuthContext = createContext<{
   user: User | null;
   uid: string | null;
   hasClaims: boolean;
+  loading: boolean;
+  isAuthenticated: boolean;
   loginWithGoogle: () => Promise<void>;
   loginWithEmailAndPassword: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -20,6 +23,8 @@ const AuthContext = createContext<{
   user: null,
   uid: null,
   hasClaims: false,
+  loading: true,
+  isAuthenticated: false,
   loginWithGoogle: () => Promise.resolve(),
   loginWithEmailAndPassword: () => Promise.resolve(),
   logout: () => Promise.resolve(),
@@ -29,12 +34,26 @@ export function AuthProvider({ children, initialUid }: any) {
   const [user, setUser] = useState<User | null>(null);
   const [uid, setUid] = useState(initialUid);
   const [hasClaims, setHasClaims] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const router = useRouter();
+  const { query } = router;
+
   // eslint-disable-next-line no-undef
   let inHandle: NodeJS.Timer;
+
+  const pushToNextPage = () => {
+    if (query?.next) {
+      if (!Array.isArray(query?.next)) router.push(query.next);
+      else router.push(query.next[0]);
+    }
+    router.back();
+  };
 
   const loginWithGoogle = async () => {
     try {
       await signInWithPopup(auth, new GoogleAuthProvider());
+      pushToNextPage();
     } catch (err: any) {
       throw new Error(err.message);
     }
@@ -43,6 +62,7 @@ export function AuthProvider({ children, initialUid }: any) {
   const loginWithEmailAndPassword = async (email: string, password: string) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      pushToNextPage();
     } catch (err: any) {
       throw new Error(err.message);
     }
@@ -51,6 +71,7 @@ export function AuthProvider({ children, initialUid }: any) {
   const logout = async () => {
     try {
       await signOut(auth);
+      router.push('/');
     } catch (err: any) {
       throw new Error(err.message);
     }
@@ -69,6 +90,7 @@ export function AuthProvider({ children, initialUid }: any) {
         nookies.set(null, 'token', '', {
           path: '/',
         });
+        setLoading(false);
         return;
       }
 
@@ -94,8 +116,10 @@ export function AuthProvider({ children, initialUid }: any) {
           const user = auth.currentUser;
           if (user) await user.getIdTokenResult(true);
         }, 10 * 1000);
+        setLoading(false);
       } else {
         clearInterval(inHandle);
+        setLoading(false);
       }
 
       return () => clearInterval(inHandle);
@@ -114,7 +138,16 @@ export function AuthProvider({ children, initialUid }: any) {
 
   return (
     <AuthContext.Provider
-      value={{ user, uid, hasClaims, loginWithEmailAndPassword, loginWithGoogle, logout }}
+      value={{
+        user,
+        uid,
+        hasClaims,
+        loginWithEmailAndPassword,
+        loginWithGoogle,
+        logout,
+        loading,
+        isAuthenticated: !!user,
+      }}
     >
       {children}
     </AuthContext.Provider>
